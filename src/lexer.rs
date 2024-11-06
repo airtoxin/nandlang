@@ -2,7 +2,7 @@ use crate::token::{BitIo, SymbolDef, Value};
 
 #[derive(Debug)]
 pub struct Lexer {
-    tokens: Vec<Value>,
+    pub tokens: Vec<Value>,
 }
 
 impl Lexer {
@@ -75,7 +75,6 @@ mod tests {
     use crate::lexer::Lexer;
     use crate::token::Value::{Input, Output, Symbol, Wire};
     use crate::token::{BitIo, SymbolDef};
-    use crate::vm::*;
 
     #[test]
     fn test_in_out() {
