@@ -1,8 +1,8 @@
 mod gate;
 mod lexer;
 mod primitive;
-mod vm;
 mod token;
+mod vm;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

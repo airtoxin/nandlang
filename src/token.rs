@@ -13,13 +13,17 @@ impl BitIo {
 #[derive(Debug, PartialEq)]
 pub struct SymbolDef {
     name: String,
-    inputs: Vec<SymbolDef>,
-    outputs: Vec<SymbolDef>,
+    inputs: Vec<String>,
+    outputs: Vec<String>,
 }
 
 impl SymbolDef {
-    pub fn new(name: String, inputs: Vec<SymbolDef>, outputs: Vec<SymbolDef>) -> SymbolDef {
-        SymbolDef { name, inputs, outputs }
+    pub fn new(name: String, inputs: Vec<String>, outputs: Vec<String>) -> SymbolDef {
+        SymbolDef {
+            name,
+            inputs,
+            outputs,
+        }
     }
 }
 
@@ -29,4 +33,5 @@ pub enum Value {
     Output(BitIo),
     Bit(bool),
     Wire(String, String),
+    Symbol(SymbolDef),
 }
