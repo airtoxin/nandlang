@@ -1,5 +1,6 @@
 mod gate;
 mod primitive;
+mod vm;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
