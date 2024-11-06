@@ -1,4 +1,4 @@
-use crate::token::{BitIo, Value};
+use crate::token::{BitIo, SymbolDef, Value};
 
 #[derive(Debug)]
 pub struct Vm {
@@ -38,6 +38,10 @@ impl Vm {
                 let value = Value::Output(BitIo::new(name.to_string(), vec![]));
                 self.tokens.push(value);
             }
+            &["FROM", src, "TO", dest] => {
+                let value = Value::Wire(src.to_string(), dest.to_string());
+                self.tokens.push(value);
+            }
             &[] => {},
             _ => panic!("Unknown tokens: {line_words:?}"),
         }
@@ -47,20 +51,19 @@ impl Vm {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::token::Value::{Input, Output};
+    use crate::token::Value::{Input, Output, Wire};
 
     #[test]
-    fn test_vm_parse() {
+    fn test_in_out() {
         let program = r#"
             IN BIT A 1 0 1 0
             IN BIT B 1 1 0 0
-            
-            
             
             OUT BIT X
         "#
         .trim()
         .to_string();
+
         let mut vm = Vm::new();
         vm.parse(program);
 
@@ -68,6 +71,20 @@ mod tests {
             Input(BitIo::new("A".to_string(), vec![true, false, true, false])),
             Input(BitIo::new("B".to_string(), vec![true, true, false, false])),
             Output(BitIo::new("X".to_string(), vec![])),
+        ]);
+    }
+    
+    #[test]
+    fn test_wiring() {
+        let program = r#"
+            FROM A TO X
+        "#.trim().to_string();
+
+        let mut vm = Vm::new();
+        vm.parse(program);
+        
+        assert_eq!(vm.tokens, [
+            Wire("A".to_string(), "X".to_string())
         ]);
     }
 }
