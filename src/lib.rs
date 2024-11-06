@@ -1,3 +1,4 @@
+mod gate;
 mod primitive;
 
 pub fn add(left: usize, right: usize) -> usize {
