@@ -1,25 +1,8 @@
+use crate::token::{BitIo, Value};
+
 #[derive(Debug)]
 pub struct Vm {
     tokens: Vec<Value>,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct BitIo {
-    name: String,
-    bits: Vec<bool>,
-}
-
-impl BitIo {
-    pub fn new(name: String, bits: Vec<bool>) -> BitIo {
-        BitIo { name, bits }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub enum Value {
-    Input(BitIo),
-    Output(BitIo),
-    Bit(bool),
 }
 
 impl Vm {
@@ -64,13 +47,15 @@ impl Vm {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vm::Value::{Input, Output};
+    use crate::token::Value::{Input, Output};
 
     #[test]
     fn test_vm_parse() {
         let program = r#"
             IN BIT A 1 0 1 0
             IN BIT B 1 1 0 0
+            
+            
             
             OUT BIT X
         "#
