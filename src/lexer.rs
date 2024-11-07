@@ -60,6 +60,7 @@ impl Lexer {
             &["GATE", "END"] => {
                 self.tokens.push(Value::GateEnd);
             }
+            &["#", ..] => { /* ignore comment line */ }
             &[] => {}
             _ => panic!("Unknown tokens: {line_words:?}"),
         }
@@ -77,7 +78,7 @@ mod tests {
         let program = r#"
             IN a BIT 1 0 1 0
             IN b BIT 1 1 0 0
-            
+
             OUT x BIT
         "#
         .trim()
@@ -157,5 +158,21 @@ mod tests {
                 GateEnd
             ]
         );
+    }
+
+    #[test]
+    fn test_comment() {
+        let program = r#"
+            # GATE START TRASH
+                # IN in BIT
+            # GATE END
+        "#
+        .trim()
+        .to_string();
+
+        let mut vm = Lexer::new();
+        vm.parse(program);
+
+        assert_eq!(vm.tokens, []);
     }
 }

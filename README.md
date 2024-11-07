@@ -88,3 +88,13 @@ GATE START NOT
     FROM nand o1 TO out out
 GATE END
 ```
+
+### Comment
+
+Lines that start with # are treated as comments.
+
+Only single-line comments are supported.
+
+```
+# this is comment line
+```
