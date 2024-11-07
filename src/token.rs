@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 #[derive(Debug, PartialEq)]
 pub struct BitIo {
     name: String,
@@ -11,18 +13,34 @@ impl BitIo {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct SymbolDef {
+pub struct VariableDef {
     name: String,
-    inputs: Vec<String>,
-    outputs: Vec<String>,
+    gate: String,
 }
 
-impl SymbolDef {
-    pub fn new(name: String, inputs: Vec<String>, outputs: Vec<String>) -> SymbolDef {
-        SymbolDef {
-            name,
-            inputs,
-            outputs,
+impl VariableDef {
+    pub fn new(name: String, gate: String) -> VariableDef {
+        VariableDef { name, gate }
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum SignalType {
+    Bit,
+    Byte8,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct WirePort {
+    variable_name: String,
+    port_name: String,
+}
+
+impl WirePort {
+    pub fn new(variable_name: String, port_name: String) -> WirePort {
+        WirePort {
+            variable_name,
+            port_name,
         }
     }
 }
@@ -32,6 +50,6 @@ pub enum Value {
     Input(BitIo),
     Output(BitIo),
     Bit(bool),
-    Wire(String, String),
-    Symbol(SymbolDef),
+    Wire(WirePort, WirePort),
+    Variable(VariableDef),
 }

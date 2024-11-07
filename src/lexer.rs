@@ -1,4 +1,4 @@
-use crate::token::{BitIo, SymbolDef, Value};
+use crate::token::{BitIo, Value, VariableDef, WirePort};
 
 #[derive(Debug)]
 pub struct Lexer {
@@ -18,7 +18,7 @@ impl Lexer {
 
     fn parse_line(&mut self, line_words: Vec<&str>) -> () {
         match line_words.as_slice() {
-            &["IN", "BIT", name, ..] => {
+            &["IN", name, "BIT", ..] => {
                 let bits = line_words[3..]
                     .iter()
                     .map(|s| {
@@ -34,34 +34,23 @@ impl Lexer {
                 let value = Value::Input(BitIo::new(name.to_string(), bits));
                 self.tokens.push(value);
             }
-            &["OUT", "BIT", name] => {
+            &["OUT", name, "BIT"] => {
                 let value = Value::Output(BitIo::new(name.to_string(), vec![]));
                 self.tokens.push(value);
             }
-            &["FROM", src, "TO", dest] => {
-                let value = Value::Wire(src.to_string(), dest.to_string());
+            &["VAR", name, gate] => {
+                let value = Value::Variable(VariableDef::new(name.to_string(), gate.to_string()));
                 self.tokens.push(value);
             }
-            &["VAR", name, ..] => {
-                let mut inputs: Vec<String> = vec![];
-                let mut outputs: Vec<String> = vec![];
-
-                let mut io_defs = line_words[2..].iter().as_slice();
-                while !io_defs.is_empty() {
-                    match io_defs {
-                        &["IN", name, ..] => {
-                            inputs.push(name.to_string());
-                            io_defs = &io_defs[2..];
-                        }
-                        &["OUT", name, ..] => {
-                            outputs.push(name.to_string());
-                            io_defs = &io_defs[2..];
-                        }
-                        _ => panic!("Unknown VAR IO {io_defs:?}"),
-                    }
-                }
-
-                let value = Value::Symbol(SymbolDef::new(name.to_string(), inputs, outputs));
+            &["FROM", input_variable_name, input_port_name, "TO", output_variable_name, output_port_name] =>
+            {
+                let value = Value::Wire(
+                    WirePort::new(input_variable_name.to_string(), input_port_name.to_string()),
+                    WirePort::new(
+                        output_variable_name.to_string(),
+                        output_port_name.to_string(),
+                    ),
+                );
                 self.tokens.push(value);
             }
             &[] => {}
@@ -73,16 +62,16 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use crate::lexer::Lexer;
-    use crate::token::Value::{Input, Output, Symbol, Wire};
-    use crate::token::{BitIo, SymbolDef};
+    use crate::token::Value::{Input, Output, Variable, Wire};
+    use crate::token::{BitIo, VariableDef, WirePort};
 
     #[test]
     fn test_in_out() {
         let program = r#"
-            IN BIT A 1 0 1 0
-            IN BIT B 1 1 0 0
+            IN a BIT 1 0 1 0
+            IN b BIT 1 1 0 0
             
-            OUT BIT X
+            OUT x BIT
         "#
         .trim()
         .to_string();
@@ -93,9 +82,9 @@ mod tests {
         assert_eq!(
             vm.tokens,
             [
-                Input(BitIo::new("A".to_string(), vec![true, false, true, false])),
-                Input(BitIo::new("B".to_string(), vec![true, true, false, false])),
-                Output(BitIo::new("X".to_string(), vec![])),
+                Input(BitIo::new("a".to_string(), vec![true, false, true, false])),
+                Input(BitIo::new("b".to_string(), vec![true, true, false, false])),
+                Output(BitIo::new("x".to_string(), vec![])),
             ]
         );
     }
@@ -103,22 +92,7 @@ mod tests {
     #[test]
     fn test_wiring() {
         let program = r#"
-            FROM A TO X
-        "#
-        .trim()
-        .to_string();
-
-        let mut vm = Lexer::new();
-        vm.parse(program);
-
-        assert_eq!(vm.tokens, [Wire("A".to_string(), "X".to_string())]);
-    }
-
-    #[test]
-    fn test_var() {
-        let program = r#"
-            VAR S IN a1 IN a2 OUT b1 OUT b2
-            VAR P OUT x
+            FROM a out TO x in
         "#
         .trim()
         .to_string();
@@ -128,18 +102,30 @@ mod tests {
 
         assert_eq!(
             vm.tokens,
-            [
-                Symbol(SymbolDef::new(
-                    "S".to_string(),
-                    vec!["a1".to_string(), "a2".to_string()],
-                    vec!["b1".to_string(), "b2".to_string()]
-                )),
-                Symbol(SymbolDef::new(
-                    "P".to_string(),
-                    vec![],
-                    vec!["x".to_string()]
-                ))
-            ]
+            [Wire(
+                WirePort::new("a".to_string(), "out".to_string()),
+                WirePort::new("x".to_string(), "in".to_string())
+            )]
+        );
+    }
+
+    #[test]
+    fn test_var() {
+        let program = r#"
+            VAR x NAND
+        "#
+        .trim()
+        .to_string();
+
+        let mut vm = Lexer::new();
+        vm.parse(program);
+
+        assert_eq!(
+            vm.tokens,
+            [Variable(VariableDef::new(
+                "x".to_string(),
+                "NAND".to_string()
+            ))]
         );
     }
 }
