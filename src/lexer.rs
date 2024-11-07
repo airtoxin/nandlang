@@ -1,4 +1,4 @@
-use crate::token::{BitIo, Token, VariableDef, WirePort};
+use crate::token::{BitIo, Token, VariableDef, WirePoint};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Lexer {
@@ -46,8 +46,8 @@ impl Lexer {
             &["FROM", input_variable_name, input_port_name, "TO", output_variable_name, output_port_name] =>
             {
                 let value = Token::Wire(
-                    WirePort::new(input_variable_name.to_string(), input_port_name.to_string()),
-                    WirePort::new(
+                    WirePoint::new(input_variable_name.to_string(), input_port_name.to_string()),
+                    WirePoint::new(
                         output_variable_name.to_string(),
                         output_port_name.to_string(),
                     ),
@@ -72,7 +72,7 @@ impl Lexer {
 mod tests {
     use crate::lexer::Lexer;
     use crate::token::Token::{GateEnd, GateStart, Input, Output, Variable, Wire};
-    use crate::token::{BitIo, VariableDef, WirePort};
+    use crate::token::{BitIo, VariableDef, WirePoint};
 
     #[test]
     fn test_in_out() {
@@ -112,8 +112,8 @@ mod tests {
         assert_eq!(
             vm.tokens,
             [Wire(
-                WirePort::new("a".to_string(), "out".to_string()),
-                WirePort::new("x".to_string(), "in".to_string())
+                WirePoint::new("a".to_string(), "out".to_string()),
+                WirePoint::new("x".to_string(), "in".to_string())
             )]
         );
     }
