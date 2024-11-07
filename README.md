@@ -2,91 +2,150 @@
 
 NAND circuit programming language.
 
-## Grammer
+## Basic
 
-**gate** refers to a basic logic gate, such as a NAND gate, while **component** refers to a user-defined custom gate or
-a more complex circuit element.
+nandlang is a programming language for creating circuits by connecting modules, much like constructing real-world
+circuits. Users write programs using nandlang's features and compile them. The compiled program functions as a circuit,
+which processes input signals at runtime and outputs results.
 
-### Define input port
+The only primitive module provided by nandlang is the NAND gate, but users can combine these to define and reuse custom
+modules.
 
-```
-IN a BIT 1 0 1 0
-IN b BIT
-```
+## Primitive modules
 
-`IN`: Reserved keyword to define an input port.
+### NAND module
 
-`a`: User-defined variable name of this input component.
+Just like in real-world circuits, the `NAND` gate is the most fundamental module in nandlang. It takes two bit signals
+as
+input and produces one bit signal as output. If both input bits are `1`, the output is `0`; otherwise, the output is
+`1`.
 
-`BIT`: Reserved keyword to specify the type of input signals.
+**ports**
 
-Rest of `1 0 ...`: User-defined signal sequence, which is sent at each tick. (Optional)
+- `i0`: Input
+- `i1`: Another input
+- `o0`: Output
 
-### Define output port
+### BITIN module
 
-```
-OUT x BIT
-```
+`BITIN` is a special module that allows bit sequences to be input from the external environment at runtime. Each bit in
+the sequence is sent as a signal to connected modules at each tick.
 
-`OUT`: Reserved keyword to define an output port.
+**ports**
 
-`x`: User-defined variable name for this output component.
+- `o0`: Output
 
-`BIT`: Reserved keyword to specify the type of output signals.
+### BITOUT module
+
+Similar to BITIN, `BITOUT` is a special module. While BITIN receives bit sequences from the external environment, BITOUT
+is used to send the execution results of the circuit to the external environment.
+
+**ports**
+
+- `i0`: Input
+
+## Syntax
+
+nandlang is a line-oriented programming language where each line represents either a module definition or a connection.
+Lines cannot be split into multiple lines or combined into a single line, unlike conventional programming languages.
 
 ### Define variable
 
-In nandlang, a primitive NAND gate or a user-defined custom gate/component is treated as a "Class" in typical
-programming languages.
+In nandlang, a module is treated similarly to a "Class" in traditional programming languages. Variables are instances of
+these modules, inheriting the ports defined by the module. These ports are used when wiring, functioning like instance
+variables.
 
-Variables are instances of these gates or components.
+Defining a variable in nandlang is analogous to placing a module on a circuit board in the real world.
 
 ```
-VAR a NAND
-VAR b MY_GATE
+VAR [name] [MODULE]
 ```
 
 `VAR`: Reserved keyword to define a variable.
 
-`a`: User-defined variable name.
+`[name]`: User-defined variable name, used when wiring.
 
-`NAND`: The name of the gate/component to assign as the type of the variable.
+`[MODULE]`: The name of the module assigned to this variable, such as NAND or a user-defined module.
+
+**Example Usage**
+
+```
+VAR in BITIN
+VAR out BITOUT
+VAR my_nand NAND
+VAR my_module MY_MODULE
+```
 
 ### Wiring
 
+Variables defined using `VAR` can be connected to each other. A single line can represent the connection between a
+specified port on a source module and a specified port on a destination module.
+
 ```
-FROM a out TO b in
-FROM b o1 TO c i1
-FROM b o2 TO d in
+FROM [src_var] [src_port] TO [dest_var] [dest_port]
 ```
 
 `FROM`: Reserved keyword to define the source of a wire.
 
-`a`: Name of the source gate/component.
+`[src_var]`: Name of the source variable.
 
-`out`: Output port name of the source gate/component.
+`[src_port]`: Output port name of the source variable.
 
 `TO`: Reserved keyword to define the destination of a wire.
 
-`b`: Name of the destination gate/component.
+`[dest_var]`: Name of the destination variable.
 
-`in`: Input port name of the destination gate/component.
+`[dest_port]`: Input port name of the destination variable.
 
-### Define Gate/Component
-
-A custom gate or component can be defined as follows:
-
-Indentation is used for visual clarity only.
+**Example Usage**
 
 ```
-GATE START NOT
-    IN in BIT
-    OUT out BIT
+FROM in o0 TO my_nand i0
+FROM in o0 TO my_nand i1
+FROM my_nand o0 TO my_module in
+```
+
+### Define module
+
+Although it is theoretically possible to represent a circuit using only NAND modules, combining multiple modules into
+meaningful units allows the creation of new, reusable modules. These custom modules have names and I/O ports, just like
+the primitive NAND module, and can be instantiated as variables.
+
+```
+MOD START [NAME]
+    VAR [in_port] BITIN
+    VAR [out_port] BITOUT
+    [...]
+MOD END
+```
+
+`MOD START`, `MOD END`: Reserved keywords that define a custom module. The section between these declarations specifies
+the module's structure.
+
+`[NAME]`: Name of the module
+
+`VAR [in_port] BITIN`: Declaration for receiving input, where `[in_port]` is the name of the input port. Repeat as
+needed for multiple inputs.
+
+`VAR [out_port] BITOUT`: Declaration for sending output, where `[out_port]` is the name of the output port. Repeat as
+needed for multiple outputs.
+
+`[...]`: Repeated wiring declarations that wire ports within the module. These can wire internal ports to each other or
+wire internal ports to the module's external ports.
+
+**Example Usage**
+
+*Indentation is used for visual clarity only.*
+
+```
+MOD START NOT
+    VAR in BITIN
+    VAR out BITOUT
     VAR nand NAND
-    FROM in in1 TO nand i1
-    FROM in in1 TO nand i2
-    FROM nand o1 TO out out
-GATE END
+    FROM in o0 TO nand i0
+    FROM in o0 TO nand i1
+    FROM nand o0 TO out i0
+MOD END
 ```
 
 ### Comment

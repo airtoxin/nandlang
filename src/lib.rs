@@ -4,17 +4,25 @@ mod primitive;
 mod token;
 mod vm;
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
-
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::vm::Vm;
 
     #[test]
     fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+        let mut vm = Vm::new();
+        let program = r#"
+            IN a BIT 1 0 1 0
+            IN b BIT 1 1 0 0
+            OUT x BIT
+
+            VAR nand NAND
+
+            FROM
+        "#
+        .trim()
+        .to_string();
+
+        vm.run(program);
     }
 }
