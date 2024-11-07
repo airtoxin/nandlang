@@ -46,7 +46,7 @@ impl WirePort {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Value {
+pub enum Token {
     Input(BitIo),
     Output(BitIo),
     Bit(bool),

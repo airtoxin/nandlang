@@ -6,9 +6,12 @@ struct VarIo {
     outputs: Vec<String>,
 }
 
+struct Scope {}
+
 pub struct Vm {
     lexer: Lexer,
     vars: HashMap<String, VarIo>,
+    scope_stack: Vec<Scope>,
 }
 
 impl Vm {

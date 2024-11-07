@@ -1,8 +1,8 @@
-use crate::token::{BitIo, Value, VariableDef, WirePort};
+use crate::token::{BitIo, Token, VariableDef, WirePort};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Lexer {
-    tokens: Vec<Value>,
+    tokens: Vec<Token>,
 }
 
 impl Lexer {
@@ -10,7 +10,7 @@ impl Lexer {
         Lexer { tokens: vec![] }
     }
 
-    pub fn parse(&mut self, program: String) -> Vec<Value> {
+    pub fn parse(&mut self, program: String) -> Vec<Token> {
         for line in program.lines() {
             self.parse_line(line.split_whitespace().collect());
         }
@@ -32,20 +32,20 @@ impl Lexer {
                         }
                     })
                     .collect();
-                let value = Value::Input(BitIo::new(name.to_string(), bits));
+                let value = Token::Input(BitIo::new(name.to_string(), bits));
                 self.tokens.push(value);
             }
             &["OUT", name, "BIT"] => {
-                let value = Value::Output(BitIo::new(name.to_string(), vec![]));
+                let value = Token::Output(BitIo::new(name.to_string(), vec![]));
                 self.tokens.push(value);
             }
             &["VAR", name, gate] => {
-                let value = Value::Variable(VariableDef::new(name.to_string(), gate.to_string()));
+                let value = Token::Variable(VariableDef::new(name.to_string(), gate.to_string()));
                 self.tokens.push(value);
             }
             &["FROM", input_variable_name, input_port_name, "TO", output_variable_name, output_port_name] =>
             {
-                let value = Value::Wire(
+                let value = Token::Wire(
                     WirePort::new(input_variable_name.to_string(), input_port_name.to_string()),
                     WirePort::new(
                         output_variable_name.to_string(),
@@ -55,11 +55,11 @@ impl Lexer {
                 self.tokens.push(value);
             }
             &["GATE", "START", gate_name] => {
-                let value = Value::GateStart(gate_name.to_string());
+                let value = Token::GateStart(gate_name.to_string());
                 self.tokens.push(value);
             }
             &["GATE", "END"] => {
-                self.tokens.push(Value::GateEnd);
+                self.tokens.push(Token::GateEnd);
             }
             &["#", ..] => { /* ignore comment line */ }
             &[] => {}
@@ -71,7 +71,7 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use crate::lexer::Lexer;
-    use crate::token::Value::{GateEnd, GateStart, Input, Output, Variable, Wire};
+    use crate::token::Token::{GateEnd, GateStart, Input, Output, Variable, Wire};
     use crate::token::{BitIo, VariableDef, WirePort};
 
     #[test]
