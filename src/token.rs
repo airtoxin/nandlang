@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BitIo {
-    name: String,
-    bits: Vec<bool>,
+    pub name: String,
+    pub bits: Vec<bool>,
 }
 
 impl BitIo {
@@ -49,7 +47,6 @@ impl WirePort {
 pub enum Token {
     Input(BitIo),
     Output(BitIo),
-    Bit(bool),
     Wire(WirePort, WirePort),
     Variable(VariableDef),
     GateStart(String),

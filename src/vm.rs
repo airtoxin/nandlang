@@ -49,5 +49,15 @@ impl Vm {
 
     pub fn run(&mut self, program: String) {
         let tokens = Lexer::new().parse(program);
+        for token in tokens {
+            match token {
+                Token::Input(_) => {}
+                Token::Output(_) => {}
+                Token::Wire(_, _) => {}
+                Token::Variable(_) => {}
+                Token::GateStart(_) => {}
+                Token::GateEnd => {}
+            }
+        }
     }
 }
