@@ -52,4 +52,6 @@ pub enum Value {
     Bit(bool),
     Wire(WirePort, WirePort),
     Variable(VariableDef),
+    GateStart(String),
+    GateEnd,
 }

@@ -76,13 +76,15 @@ FROM b o2 TO d in
 
 A custom gate or component can be defined as follows:
 
+Indentation is used for visual clarity only.
+
 ```
 GATE START NOT
-IN in BIT
-OUT out BIT
-VAR nand NAND
-FROM in in1 TO nand i1
-FROM in in1 TO nand i2
-FROM nand o1 TO out out
+    IN in BIT
+    OUT out BIT
+    VAR nand NAND
+    FROM in in1 TO nand i1
+    FROM in in1 TO nand i2
+    FROM nand o1 TO out out
 GATE END
 ```

@@ -53,6 +53,13 @@ impl Lexer {
                 );
                 self.tokens.push(value);
             }
+            &["GATE", "START", gate_name] => {
+                let value = Value::GateStart(gate_name.to_string());
+                self.tokens.push(value);
+            }
+            &["GATE", "END"] => {
+                self.tokens.push(Value::GateEnd);
+            }
             &[] => {}
             _ => panic!("Unknown tokens: {line_words:?}"),
         }
@@ -62,7 +69,7 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use crate::lexer::Lexer;
-    use crate::token::Value::{Input, Output, Variable, Wire};
+    use crate::token::Value::{GateEnd, GateStart, Input, Output, Variable, Wire};
     use crate::token::{BitIo, VariableDef, WirePort};
 
     #[test]
@@ -126,6 +133,29 @@ mod tests {
                 "x".to_string(),
                 "NAND".to_string()
             ))]
+        );
+    }
+
+    #[test]
+    fn test_gate_def() {
+        let program = r#"
+            GATE START TRASH
+                IN in BIT
+            GATE END
+        "#
+        .trim()
+        .to_string();
+
+        let mut vm = Lexer::new();
+        vm.parse(program);
+
+        assert_eq!(
+            vm.tokens,
+            [
+                GateStart("TRASH".to_string()),
+                Input(BitIo::new("in".to_string(), vec![])),
+                GateEnd
+            ]
         );
     }
 }
