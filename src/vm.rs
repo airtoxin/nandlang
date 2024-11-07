@@ -1,34 +1,53 @@
 use crate::lexer::Lexer;
+use crate::token::{SignalType, Token};
 use std::collections::HashMap;
 
-struct VarIo {
-    inputs: Vec<String>,
-    outputs: Vec<String>,
+struct Gate {
+    name: String,
+    input_ports: HashMap<String, SignalType>,
+    output_ports: HashMap<String, SignalType>,
 }
 
-struct Scope {}
+struct Scope {
+    variables: HashMap<String, Token>,
+    gates: Vec<Gate>,
+}
+
+impl Scope {
+    pub fn new() -> Scope {
+        Scope {
+            variables: HashMap::new(),
+            gates: vec![],
+        }
+    }
+
+    pub fn add_gate(&mut self, gate: Gate) -> () {
+        self.gates.push(gate);
+    }
+}
 
 pub struct Vm {
-    lexer: Lexer,
-    vars: HashMap<String, VarIo>,
     scope_stack: Vec<Scope>,
 }
 
 impl Vm {
     pub fn new() -> Vm {
+        let mut global_scope = Scope::new();
+        global_scope.add_gate(Gate {
+            name: "NAND".to_string(),
+            input_ports: HashMap::from([
+                ("0".to_string(), SignalType::Bit),
+                ("1".to_string(), SignalType::Bit),
+            ]),
+            output_ports: HashMap::from([("0".to_string(), SignalType::Bit)]),
+        });
+
         Vm {
-            lexer: Lexer::new(),
-            vars: HashMap::from([(
-                "NAND".to_string(),
-                VarIo {
-                    inputs: vec!["i1".to_string(), "i2".to_string()],
-                    outputs: vec!["o1".to_string()],
-                },
-            )]),
+            scope_stack: vec![global_scope],
         }
     }
 
     pub fn run(&mut self, program: String) {
-        let tokens = self.lexer.parse(program);
+        let tokens = Lexer::new().parse(program);
     }
 }

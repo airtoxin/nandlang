@@ -25,7 +25,7 @@ impl VariableDef {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-enum SignalType {
+pub enum SignalType {
     Bit,
     Byte8,
 }
