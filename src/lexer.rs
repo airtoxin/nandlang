@@ -1,8 +1,8 @@
 use crate::token::{BitIo, Value, VariableDef, WirePort};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Lexer {
-    pub tokens: Vec<Value>,
+    tokens: Vec<Value>,
 }
 
 impl Lexer {
@@ -10,10 +10,11 @@ impl Lexer {
         Lexer { tokens: vec![] }
     }
 
-    pub fn parse(&mut self, program: String) {
+    pub fn parse(&mut self, program: String) -> Vec<Value> {
         for line in program.lines() {
             self.parse_line(line.split_whitespace().collect());
         }
+        self.tokens.clone()
     }
 
     fn parse_line(&mut self, line_words: Vec<&str>) -> () {

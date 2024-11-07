@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct BitIo {
     name: String,
     bits: Vec<bool>,
@@ -12,7 +12,7 @@ impl BitIo {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct VariableDef {
     name: String,
     gate: String,
@@ -24,13 +24,13 @@ impl VariableDef {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 enum SignalType {
     Bit,
     Byte8,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WirePort {
     variable_name: String,
     port_name: String,
@@ -45,7 +45,7 @@ impl WirePort {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Value {
     Input(BitIo),
     Output(BitIo),

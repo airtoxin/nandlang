@@ -26,6 +26,6 @@ impl Vm {
     }
 
     pub fn run(&mut self, program: String) {
-        self.lexer.parse(program);
+        let tokens = self.lexer.parse(program);
     }
 }
