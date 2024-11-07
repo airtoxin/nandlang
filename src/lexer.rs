@@ -1,4 +1,4 @@
-use crate::token::{BitIo, Token, VariableDef, WirePoint};
+use crate::token::{Token, VariableDef, WirePoint};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Lexer {
@@ -19,50 +19,34 @@ impl Lexer {
 
     fn parse_line(&mut self, line_words: Vec<&str>) -> () {
         match line_words.as_slice() {
-            &["IN", name, "BIT", ..] => {
-                let bits = line_words[3..]
-                    .iter()
-                    .map(|s| {
-                        if s.to_string() == "0" {
-                            false
-                        } else if s.to_string() == "1" {
-                            true
-                        } else {
-                            panic!("Unknown bit {s}")
-                        }
-                    })
-                    .collect();
-                let value = Token::Input(BitIo::new(name.to_string(), bits));
+            &["VAR", var_name, module_name] => {
+                let value = Token::Variable(VariableDef {
+                    var_name: var_name.to_string(),
+                    module_name: module_name.to_string(),
+                });
                 self.tokens.push(value);
             }
-            &["OUT", name, "BIT"] => {
-                let value = Token::Output(BitIo::new(name.to_string(), vec![]));
-                self.tokens.push(value);
-            }
-            &["VAR", name, gate] => {
-                let value = Token::Variable(VariableDef::new(name.to_string(), gate.to_string()));
-                self.tokens.push(value);
-            }
-            &["FROM", input_variable_name, input_port_name, "TO", output_variable_name, output_port_name] =>
-            {
+            &["FROM", src_var, src_port, "TO", dest_var, dest_port] => {
                 let value = Token::Wire(
-                    WirePoint::new(input_variable_name.to_string(), input_port_name.to_string()),
-                    WirePoint::new(
-                        output_variable_name.to_string(),
-                        output_port_name.to_string(),
-                    ),
+                    WirePoint {
+                        var_name: src_var.to_string(),
+                        port_name: src_port.to_string(),
+                    },
+                    WirePoint {
+                        var_name: dest_var.to_string(),
+                        port_name: dest_port.to_string(),
+                    },
                 );
                 self.tokens.push(value);
             }
             &["GATE", "START", gate_name] => {
-                let value = Token::GateStart(gate_name.to_string());
+                let value = Token::ModuleStart(gate_name.to_string());
                 self.tokens.push(value);
             }
             &["GATE", "END"] => {
-                self.tokens.push(Token::GateEnd);
+                self.tokens.push(Token::ModuleEnd);
             }
             &["#", ..] => { /* ignore comment line */ }
-            &[] => {}
             _ => panic!("Unknown tokens: {line_words:?}"),
         }
     }
@@ -71,32 +55,8 @@ impl Lexer {
 #[cfg(test)]
 mod tests {
     use crate::lexer::Lexer;
-    use crate::token::Token::{GateEnd, GateStart, Input, Output, Variable, Wire};
-    use crate::token::{BitIo, VariableDef, WirePoint};
-
-    #[test]
-    fn test_in_out() {
-        let program = r#"
-            IN a BIT 1 0 1 0
-            IN b BIT 1 1 0 0
-
-            OUT x BIT
-        "#
-        .trim()
-        .to_string();
-
-        let mut vm = Lexer::new();
-        vm.parse(program);
-
-        assert_eq!(
-            vm.tokens,
-            [
-                Input(BitIo::new("a".to_string(), vec![true, false, true, false])),
-                Input(BitIo::new("b".to_string(), vec![true, true, false, false])),
-                Output(BitIo::new("x".to_string(), vec![])),
-            ]
-        );
-    }
+    use crate::token::Token::{ModuleEnd, ModuleStart, Variable, Wire};
+    use crate::token::{VariableDef, WirePoint};
 
     #[test]
     fn test_wiring() {
@@ -112,8 +72,14 @@ mod tests {
         assert_eq!(
             vm.tokens,
             [Wire(
-                WirePoint::new("a".to_string(), "out".to_string()),
-                WirePoint::new("x".to_string(), "in".to_string())
+                WirePoint {
+                    var_name: "a".to_string(),
+                    port_name: "out".to_string()
+                },
+                WirePoint {
+                    var_name: "x".to_string(),
+                    port_name: "in".to_string()
+                }
             )]
         );
     }
@@ -131,10 +97,10 @@ mod tests {
 
         assert_eq!(
             vm.tokens,
-            [Variable(VariableDef::new(
-                "x".to_string(),
-                "NAND".to_string()
-            ))]
+            [Variable(VariableDef {
+                var_name: "x".to_string(),
+                module_name: "NAND".to_string()
+            })]
         );
     }
 
@@ -142,7 +108,7 @@ mod tests {
     fn test_gate_def() {
         let program = r#"
             GATE START TRASH
-                IN in BIT
+                VAR in BITIN
             GATE END
         "#
         .trim()
@@ -154,9 +120,12 @@ mod tests {
         assert_eq!(
             vm.tokens,
             [
-                GateStart("TRASH".to_string()),
-                Input(BitIo::new("in".to_string(), vec![])),
-                GateEnd
+                ModuleStart("TRASH".to_string()),
+                Variable(VariableDef {
+                    var_name: "in".to_string(),
+                    module_name: "BITIN".to_string()
+                }),
+                ModuleEnd
             ]
         );
     }

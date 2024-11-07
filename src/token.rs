@@ -1,35 +1,19 @@
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct VariableDef {
-    name: String,
-    module_name: String,
-}
-
-impl VariableDef {
-    pub fn new(name: String, module_name: String) -> VariableDef {
-        VariableDef { name, module_name }
-    }
+    pub var_name: String,
+    pub module_name: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct WirePoint {
-    var_name: String,
-    port_name: String,
-}
-
-impl WirePoint {
-    pub fn new(var_name: String, port_name: String) -> WirePoint {
-        WirePoint {
-            var_name,
-            port_name,
-        }
-    }
+    pub var_name: String,
+    pub port_name: String,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Token {
     Wire(WirePoint, WirePoint),
     Variable(VariableDef),
-    GateStart(String),
-    GateEnd,
-    Comment(String),
+    ModuleStart(String),
+    ModuleEnd,
 }
