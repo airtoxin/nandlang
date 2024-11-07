@@ -39,11 +39,11 @@ impl Lexer {
                 );
                 self.tokens.push(value);
             }
-            &["GATE", "START", gate_name] => {
-                let value = Token::ModuleStart(gate_name.to_string());
+            &["MOD", "START", module_name] => {
+                let value = Token::ModuleStart(module_name.to_string());
                 self.tokens.push(value);
             }
-            &["GATE", "END"] => {
+            &["MOD", "END"] => {
                 self.tokens.push(Token::ModuleEnd);
             }
             &["#", ..] => { /* ignore comment line */ }
@@ -105,11 +105,11 @@ mod tests {
     }
 
     #[test]
-    fn test_gate_def() {
+    fn test_module_def() {
         let program = r#"
-            GATE START TRASH
+            MOD START TRASH
                 VAR in BITIN
-            GATE END
+            MOD END
         "#
         .trim()
         .to_string();
@@ -133,9 +133,9 @@ mod tests {
     #[test]
     fn test_comment() {
         let program = r#"
-            # GATE START TRASH
+            # MOD START TRASH
                 # IN in BIT
-            # GATE END
+            # MOD END
         "#
         .trim()
         .to_string();
