@@ -10,8 +10,8 @@ impl Lexer {
         Lexer { tokens: vec![] }
     }
 
-    pub fn parse(&mut self, program: String) -> Vec<Token> {
-        for line in program.lines() {
+    pub fn parse(&mut self, program: impl Into<String>) -> Vec<Token> {
+        for line in program.into().lines() {
             self.parse_line(line.split_whitespace().collect());
         }
         self.tokens.clone()
@@ -54,7 +54,7 @@ impl Lexer {
 
 #[cfg(test)]
 mod tests {
-    use crate::lexer::Lexer;
+    use super::*;
     use crate::token::Token::{ModuleEnd, ModuleStart, Variable, Wire};
     use crate::token::{VariableDef, WirePoint};
 
