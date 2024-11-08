@@ -3,8 +3,10 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Wire {
-    src: Variable,
-    dest: Variable,
+    pub src: Variable,
+    pub src_port: String,
+    pub dest: Variable,
+    pub dest_port: String,
 }
 
 #[derive(Clone)]

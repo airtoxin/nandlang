@@ -1,5 +1,5 @@
 use crate::lexer::Lexer;
-use crate::module::{Module, Variable};
+use crate::module::{Module, Variable, Wire};
 use crate::token::Token;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -28,7 +28,9 @@ impl Vm {
         for token in tokens {
             let current_module = self.modules.last().unwrap(); // 常にトップレベルのGlobalモジュールがあるのでunwrapして良い
             match token {
-                Token::Wire(_, _) => {}
+                Token::Wire(src, dest) => {
+                    current_module.borrow_mut().wires.push(Wire { src: , dest })
+                }
                 Token::Variable(def) => current_module.borrow_mut().vars.push(Variable {
                     name: def.var_name,
                     module: self.get_module(def.module_name).unwrap(),
@@ -48,6 +50,15 @@ impl Vm {
             .iter()
             .rfind(|m| m.borrow().name == module_name)
             .cloned()
+    }
+    
+    fn get_variable(&self, variable_name: String) -> Option<Rc<RefCell<Variable>>> {
+        self.modules
+            .iter()
+            .flat_map(|m| m.borrow().vars.iter().map(
+                |v| Rc::new(RefCell::new(v))
+            ))
+            .rfind(|v| v.borrow().name == variable_name)
     }
 }
 
